@@ -9,12 +9,19 @@ app = FastAPI()
 @app.post("/webhook")
 async def webhook(request: Request):
     data = await request.json()
-    print("Webhook received:", data)  # Lägg till denna rad
+    print("Webhook received:", data)
+    
+    required_keys = {"ticker", "action", "confidence", "time"}
+    if not required_keys.issubset(data):
+        raise HTTPException(status_code=400, detail="Missing required keys in payload")
+
     result = process_signal(data)
-    print("Processed signal:", result)  # Lägg till denna också
+    print("Processed signal:", result)
+
     if result["status"] == "executed":
         log_trade(result)
         send_trade_alert(result)
+
     return {"received": True, "result": result}
 
 @app.post("/close")

@@ -43,15 +43,16 @@ def generate_mock_ohlcv(n=100):
         "volume": np.random.randint(100, 1000, size=n)
     })
 
-def process_signal(data: dict) -> dict:
+def process_signal(data):
+    # Exempel: lägg till ett dummypris om det inte finns
     return {
-        "time": data["time"],
         "ticker": data["ticker"],
         "action": data["action"],
         "confidence": data["confidence"],
-        "price": 65300.0,  # <-- Lägg till dummypris
-        "ai_decision": "buy",
-        "status": "executed"
+        "time": data["time"],
+        "price": data.get("price", 65300.0),  # <-- viktigt!
+        "status": "executed",
+        "ai_decision": "buy"
     }
     
     df = generate_mock_ohlcv()

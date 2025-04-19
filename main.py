@@ -27,3 +27,7 @@ async def close_trade(payload: dict):
         return {"status": "closed", "ticker": ticker, "pnl": pnl}
     else:
         raise HTTPException(status_code=404, detail="No open position for ticker")
+
+@app.get("/")
+def healthcheck():
+    return {"status": "AI trader running"}

@@ -43,13 +43,17 @@ def generate_mock_ohlcv(n=100):
         "volume": np.random.randint(100, 1000, size=n)
     })
 
-def process_signal(signal):
-    ticker = signal.get("ticker")
-    action = signal.get("action")
-    confidence = float(signal.get("confidence", 0))
-    time = signal.get("time", datetime.utcnow().isoformat())
-    threshold = float(os.getenv("CONFIDENCE_THRESHOLD", 1.8))
-
+def process_signal(data: dict) -> dict:
+    # MOCK: Alltid agera som om AI sagt 'köp'
+    return {
+        "time": data["time"],
+        "ticker": data["ticker"],
+        "action": data["action"],
+        "confidence": data["confidence"],
+        "ai_decision": "buy",
+        "status": "executed"
+    }
+    
     df = generate_mock_ohlcv()
     features = extract_features_from_ohlcv(df)
     feature_dict = {

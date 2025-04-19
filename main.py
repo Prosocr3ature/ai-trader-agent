@@ -6,7 +6,7 @@ from portfolio import close_position
 
 app = FastAPI()
 
-@@app.post("/webhook")
+@app.post("/webhook")
 async def webhook(request: Request):
     data = await request.json()
     print("Webhook received:", data)  # Lägg till denna rad

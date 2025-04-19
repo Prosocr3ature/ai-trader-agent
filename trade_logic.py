@@ -44,12 +44,12 @@ def generate_mock_ohlcv(n=100):
     })
 
 def process_signal(data: dict) -> dict:
-    # MOCK: Alltid agera som om AI sagt 'köp'
     return {
         "time": data["time"],
         "ticker": data["ticker"],
         "action": data["action"],
         "confidence": data["confidence"],
+        "price": 65300.0,  # <-- Lägg till dummypris
         "ai_decision": "buy",
         "status": "executed"
     }

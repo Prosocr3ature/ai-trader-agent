@@ -44,15 +44,59 @@ def generate_mock_ohlcv(n=100):
     })
 
 def process_signal(data):
-    # Exempel: lägg till ett dummypris om det inte finns
+    df = generate_mock_ohlcv()
+    features = extract_features_from_ohlcv(df)
+    feature_dict = {
+        "rsi": features["rsi"],
+        "ema_20": features["ema_20"],
+        "ema_50": features["ema_50"],
+        "macd": features["macd"],
+        "volatility": features["volatility"],
+        "pattern_score": features["pattern_score"]
+    }
+
+    ticker = data["ticker"]
+    action = data["action"]
+    confidence = data["confidence"]
+    time = data["time"]
+    price = data.get("price", 65300.0)
+
+    ai_decision = predict_advanced_action(feature_dict)
+    combined_score = confidence + int(ai_decision == "buy")
+    threshold = 1.5  # Justerbar tröskel
+
+    if combined_score >= threshold and ai_decision == "buy":
+        balance = get_balance()
+        if balance < 100:
+            send_system_status(f"⚠️ Låg balans: {balance:.2f} USDT. Trade avbröts.")
+            return {"status": "ignored", "reason": "Insufficient balance", "balance": balance}
+        
+        amount = round(100 / price, 4)
+        add_position(ticker, price, amount)
+        stop_loss_pct = float(os.getenv("STOP_LOSS_PCT", 0.015))
+        trailing_stop_pct = float(os.getenv("TRAILING_STOP_PCT", 0.02))
+        stop_loss = round(price * (1 - stop_loss_pct), 2)
+        trailing_stop = round(price * (1 + trailing_stop_pct), 2)
+
+        return {
+            "time": time,
+            "ticker": ticker,
+            "action": action,
+            "price": price,
+            "stop_loss": stop_loss,
+            "trailing_stop": trailing_stop,
+            "confidence": confidence,
+            "ai_decision": ai_decision,
+            "status": "executed"
+        }
+
     return {
-        "ticker": data["ticker"],
-        "action": data["action"],
-        "confidence": data["confidence"],
-        "time": data["time"],
-        "price": data.get("price", 65300.0),  # <-- viktigt!
-        "status": "executed",
-        "ai_decision": "buy"
+        "time": time,
+        "ticker": ticker,
+        "action": action,
+        "confidence": confidence,
+        "ai_decision": ai_decision,
+        "status": "ignored"
     }
     
     df = generate_mock_ohlcv()

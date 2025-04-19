@@ -6,10 +6,12 @@ from portfolio import close_position
 
 app = FastAPI()
 
-@app.post("/webhook")
+@@app.post("/webhook")
 async def webhook(request: Request):
     data = await request.json()
+    print("Webhook received:", data)  # Lägg till denna rad
     result = process_signal(data)
+    print("Processed signal:", result)  # Lägg till denna också
     if result["status"] == "executed":
         log_trade(result)
         send_trade_alert(result)
